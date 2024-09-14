@@ -1,3 +1,13 @@
+mod virtual_machine;
+use crate::virtual_machine::*;
+
 fn main() {
-    println!("Hello, world!");
+    let mut vm = VirtualMachine::new();
+
+    println!("{:?}", vm);
+
+    vm.add();
+    vm.add();
+
+    println!("{:?}", vm);
 }
