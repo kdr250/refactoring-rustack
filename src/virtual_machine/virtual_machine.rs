@@ -14,11 +14,8 @@ impl VirtualMachine {
         }
     }
 
-    /// パースした要素を入れる
-    pub fn push(&mut self, element: Element) {
-        match element {
-            Element::Number(num) => self.stack.push(num),
-            Element::Operation(operation) => self.stack.execute(operation),
-        }
+    ///　要素を処理する
+    pub fn process(&mut self, element: Element) {
+        self.stack.process(element);
     }
 }
