@@ -1,13 +1,10 @@
 mod virtual_machine;
-use crate::virtual_machine::*;
 
 fn main() {
-    let mut vm = VirtualMachine::new();
-
-    println!("{:?}", vm);
-
-    vm.add();
-    vm.add();
-
-    println!("{:?}", vm);
+    for line in std::io::stdin().lines() {
+        if let Ok(line) = line {
+            let words: Vec<_> = line.split(" ").collect();
+            println!("Line: {:?}", words); // FIXME
+        }
+    }
 }
