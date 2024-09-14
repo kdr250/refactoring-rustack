@@ -1,4 +1,4 @@
-use super::stack::Stack;
+use super::{stack::Stack, Element};
 
 /// スタックベース仮想マシン
 #[derive(Debug)]
@@ -9,18 +9,16 @@ pub struct VirtualMachine {
 impl VirtualMachine {
     /// スタックベース仮想マシンを生成する
     pub fn new() -> Self {
-        let mut stack = Stack::new();
-
-        // FIXME
-        stack.push(42);
-        stack.push(36);
-        stack.push(22);
-
-        Self { stack }
+        Self {
+            stack: Stack::new(),
+        }
     }
 
-    /// 加算を行う
-    pub fn add(&mut self) {
-        self.stack.add();
+    /// パースした要素を入れる
+    pub fn push(&mut self, element: Element) {
+        match element {
+            Element::Number(num) => self.stack.push(num),
+            Element::Operation(operation) => self.stack.execute(operation),
+        }
     }
 }

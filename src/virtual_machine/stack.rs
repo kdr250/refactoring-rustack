@@ -1,3 +1,5 @@
+use super::parser::Operation;
+
 /// スタック
 #[derive(Debug)]
 pub struct Stack {
@@ -10,9 +12,19 @@ impl Stack {
         Self { list: vec![] }
     }
 
-    /// スタックに要素を入れる
+    /// スタックに数値を入れる
     pub fn push(&mut self, element: i32) {
         self.list.push(element);
+    }
+
+    /// 演算を実行する
+    pub fn execute(&mut self, operation: Operation) {
+        match operation {
+            Operation::Add => self.add(),
+            Operation::Subtract => self.subtract(),
+            Operation::Multiply => self.multiply(),
+            Operation::Divide => self.divide(),
+        }
     }
 
     /// 加算を行う
@@ -20,6 +32,27 @@ impl Stack {
         let rhs = self.list.pop().unwrap();
         let lhs = self.list.pop().unwrap();
         self.list.push(lhs + rhs);
+    }
+
+    /// 減算を行う
+    fn subtract(&mut self) {
+        let rhs = self.list.pop().unwrap();
+        let lhs = self.list.pop().unwrap();
+        self.list.push(lhs - rhs);
+    }
+
+    /// 乗算を行う
+    fn multiply(&mut self) {
+        let rhs = self.list.pop().unwrap();
+        let lhs = self.list.pop().unwrap();
+        self.list.push(lhs * rhs);
+    }
+
+    /// 除算を行う
+    fn divide(&mut self) {
+        let rhs = self.list.pop().unwrap();
+        let lhs = self.list.pop().unwrap();
+        self.list.push(lhs / rhs);
     }
 }
 
