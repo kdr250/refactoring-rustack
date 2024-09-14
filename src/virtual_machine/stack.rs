@@ -20,6 +20,13 @@ impl Stack {
         }
     }
 
+    ///　要素を複数処理する
+    fn process_multiple(&mut self, elements: Vec<Element>) {
+        for element in elements {
+            self.process(element);
+        }
+    }
+
     /// スタックに要素を入れる
     fn push(&mut self, element: Element) {
         self.list.push(element);
@@ -32,6 +39,7 @@ impl Stack {
             Operation::Subtract => self.subtract(),
             Operation::Multiply => self.multiply(),
             Operation::Divide => self.divide(),
+            Operation::If => self.operation_if(),
         }
     }
 
@@ -62,12 +70,36 @@ impl Stack {
         let lhs = self.list.pop().unwrap().as_number();
         self.list.push(Element::Number(lhs / rhs));
     }
+
+    /// 条件分岐を行う
+    fn operation_if(&mut self) {
+        let false_branch = self.list.pop().unwrap().to_block_vec();
+        let true_branch = self.list.pop().unwrap().to_block_vec();
+        let condition = self.list.pop().unwrap().to_block_vec();
+
+        self.process_multiple(condition);
+
+        let condition_result = self.list.pop().unwrap().as_number();
+
+        match condition_result {
+            0 => self.process_multiple(false_branch),
+            _ => self.process_multiple(true_branch),
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::super::parser::{tests::helper_create_block, Element, Parser};
     use super::Stack;
+
+    fn parse(parser: &mut Parser) -> Stack {
+        let mut stack = Stack::new();
+        while let Some(element) = parser.next() {
+            stack.process(element);
+        }
+        stack
+    }
 
     #[test]
     fn test_add() {
@@ -83,10 +115,7 @@ mod tests {
     #[test]
     fn test_process() {
         let mut parser = Parser::new("1 2 + { 3 4 }");
-        let mut stack = Stack::new();
-        while let Some(element) = parser.next() {
-            stack.process(element);
-        }
+        let stack = parse(&mut parser);
 
         assert_eq!(
             stack.list,
@@ -98,5 +127,21 @@ mod tests {
                 ]))
             ]
         )
+    }
+
+    #[test]
+    fn test_if_true() {
+        let mut parser = Parser::new("{ 1 -1 + } { 100 } { -100 } if");
+        let stack = parse(&mut parser);
+
+        assert_eq!(stack.list, vec![Element::Number(-100)])
+    }
+
+    #[test]
+    fn test_if_false() {
+        let mut parser = Parser::new("{ 1 1 + } { 100 } { -100 } if");
+        let stack = parse(&mut parser);
+
+        assert_eq!(stack.list, vec![Element::Number(100)])
     }
 }

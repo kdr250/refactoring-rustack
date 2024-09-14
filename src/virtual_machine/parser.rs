@@ -18,7 +18,7 @@ impl<'a> Parser<'a> {
 }
 
 /// パースした要素
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Element {
     /// 数値
     Number(i32),
@@ -51,10 +51,17 @@ impl Element {
             _ => panic!("Element is not a number"),
         }
     }
+
+    pub fn to_block_vec(&self) -> Vec<Element> {
+        match self {
+            Element::Block(block) => block.to_vec(),
+            _ => panic!("Value is not a block"),
+        }
+    }
 }
 
 /// 演算の種類
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Operation {
     /// 加算
     Add,
@@ -64,6 +71,8 @@ pub enum Operation {
     Multiply,
     /// 除算
     Divide,
+    /// 条件分岐
+    If,
 }
 
 impl Operation {
@@ -74,13 +83,14 @@ impl Operation {
             "-" => Some(Operation::Subtract),
             "*" => Some(Operation::Multiply),
             "/" => Some(Operation::Divide),
+            "if" => Some(Operation::If),
             _ => None,
         }
     }
 }
 
 /// ブロック要素を表す構造体
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Block {
     tokens: Vec<Element>,
 }
@@ -107,6 +117,10 @@ impl Block {
         }
 
         Some(Block { tokens })
+    }
+
+    pub fn to_vec(&self) -> Vec<Element> {
+        self.tokens.clone()
     }
 }
 
