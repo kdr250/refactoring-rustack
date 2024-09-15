@@ -183,7 +183,7 @@ impl Block {
                 if blocks.is_empty() {
                     return Some(block);
                 } else {
-                    blocks[index - 1].add(Element::Block(block.clone()));
+                    blocks[index - 1].add(Element::Block(block));
                     return Block::parse(iter, blocks);
                 }
             } else if let Ok(parsed) = word.parse::<i32>() {
