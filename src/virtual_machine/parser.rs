@@ -177,7 +177,11 @@ impl Block {
             } else if word == "{" {
                 blocks.push(Block::new());
                 let inner_block = Block::parse(iter, blocks)?;
-                blocks[index].add(Element::Block(inner_block));
+                if blocks.is_empty() {
+                    return Some(inner_block);
+                } else {
+                    blocks[index].add(Element::Block(inner_block));
+                }
             } else if word == "}" {
                 let block = blocks.pop().unwrap();
                 if blocks.is_empty() {
@@ -245,6 +249,25 @@ pub mod tests {
                     tokens: vec![Element::Number(3), Element::Number(4)]
                 })
             ]
+        );
+    }
+
+    #[test]
+    fn test_group2() {
+        let mut parser = Parser::new();
+        parser.parse(String::from("{ { 3 } 4 }"));
+        let actual = vec![parser.next().unwrap()];
+
+        assert_eq!(
+            actual,
+            vec![Element::Block(Block {
+                tokens: vec![
+                    Element::Block(Block {
+                        tokens: vec![Element::Number(3)]
+                    }),
+                    Element::Number(4)
+                ]
+            })]
         );
     }
 
