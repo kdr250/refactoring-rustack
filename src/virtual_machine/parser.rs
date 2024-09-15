@@ -24,6 +24,8 @@ pub enum Element {
     Number(i32),
     /// 演算子
     Operation(Operation),
+    /// シンボル
+    Symbol(String),
     /// ブロック
     Block(Block),
 }
@@ -39,8 +41,10 @@ impl Element {
             Some(Element::Block(block))
         } else if let Ok(parsed) = word.parse::<i32>() {
             Some(Element::Number(parsed))
+        } else if word.starts_with("/") {
+            Some(Element::Symbol(word[1..].to_owned()))
         } else {
-            let operation = Operation::parse(word)?;
+            let operation = Operation::parse(word);
             Some(Element::Operation(operation))
         }
     }
@@ -49,6 +53,13 @@ impl Element {
         match self {
             Element::Number(num) => *num,
             _ => panic!("Element is not a number"),
+        }
+    }
+
+    pub fn as_symbol(&self) -> String {
+        match self {
+            Element::Symbol(symbol) => symbol.clone(),
+            _ => panic!("Element is not a symbol"),
         }
     }
 
@@ -61,7 +72,7 @@ impl Element {
 }
 
 /// 演算の種類
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Operation {
     /// 加算
     Add,
@@ -71,20 +82,28 @@ pub enum Operation {
     Multiply,
     /// 除算
     Divide,
+    /// 小なり
+    LightThan,
     /// 条件分岐
     If,
+    /// 変数定義
+    Define,
+    /// 変数をスタックに入れる
+    Push(String),
 }
 
 impl Operation {
     /// パースする
-    fn parse(word: &str) -> Option<Operation> {
+    fn parse(word: &str) -> Operation {
         match word {
-            "+" => Some(Operation::Add),
-            "-" => Some(Operation::Subtract),
-            "*" => Some(Operation::Multiply),
-            "/" => Some(Operation::Divide),
-            "if" => Some(Operation::If),
-            _ => None,
+            "+" => Operation::Add,
+            "-" => Operation::Subtract,
+            "*" => Operation::Multiply,
+            "/" => Operation::Divide,
+            "<" => Operation::LightThan,
+            "if" => Operation::If,
+            "def" => Operation::Define,
+            _ => Operation::Push(word.to_owned()),
         }
     }
 }
@@ -111,7 +130,7 @@ impl Block {
             } else if let Ok(parsed) = word.parse::<i32>() {
                 tokens.push(Element::Number(parsed))
             } else {
-                let operation = Operation::parse(word)?;
+                let operation = Operation::parse(word);
                 tokens.push(Element::Operation(operation))
             }
         }

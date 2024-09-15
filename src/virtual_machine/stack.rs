@@ -1,21 +1,27 @@
-use super::{parser::Operation, Element};
+use std::collections::HashMap;
+
+use super::{parser::Operation, stack_helper::impl_operation, Element};
 
 /// スタック
 #[derive(Debug)]
 pub struct Stack {
     list: Vec<Element>,
+    variables: HashMap<String, Element>,
 }
 
 impl Stack {
     /// スタックを生成する
     pub fn new() -> Self {
-        Self { list: vec![] }
+        Self {
+            list: vec![],
+            variables: HashMap::new(),
+        }
     }
 
     ///　要素を処理する
     pub fn process(&mut self, element: Element) {
         match element {
-            Element::Number(_) | Element::Block(_) => self.push(element),
+            Element::Number(_) | Element::Block(_) | Element::Symbol(_) => self.push(element),
             Element::Operation(operation) => self.execute(operation),
         }
     }
@@ -32,6 +38,15 @@ impl Stack {
         self.list.push(element);
     }
 
+    /// 変数マップから要素を取得してスタックに入れる
+    fn push_variable(&mut self, variable: String) {
+        let element = self
+            .variables
+            .get(&variable)
+            .expect(&format!("{variable:?} is not a defined operation"));
+        self.push(element.clone());
+    }
+
     /// 演算を実行する
     fn execute(&mut self, operation: Operation) {
         match operation {
@@ -39,37 +54,27 @@ impl Stack {
             Operation::Subtract => self.subtract(),
             Operation::Multiply => self.multiply(),
             Operation::Divide => self.divide(),
+            Operation::LightThan => self.less_than(),
             Operation::If => self.operation_if(),
+            Operation::Define => self.operation_define(),
+            Operation::Push(variable) => self.push_variable(variable),
         }
     }
 
-    /// 加算を行う
-    pub fn add(&mut self) {
-        let rhs = self.list.pop().unwrap().as_number();
-        let lhs = self.list.pop().unwrap().as_number();
-        self.list.push(Element::Number(lhs + rhs));
-    }
+    // 加算を行う
+    impl_operation!(add, +);
 
-    /// 減算を行う
-    fn subtract(&mut self) {
-        let rhs = self.list.pop().unwrap().as_number();
-        let lhs = self.list.pop().unwrap().as_number();
-        self.list.push(Element::Number(lhs - rhs));
-    }
+    // 減算を行う
+    impl_operation!(subtract, -);
 
-    /// 乗算を行う
-    fn multiply(&mut self) {
-        let rhs = self.list.pop().unwrap().as_number();
-        let lhs = self.list.pop().unwrap().as_number();
-        self.list.push(Element::Number(lhs * rhs));
-    }
+    // 乗算を行う
+    impl_operation!(multiply, *);
 
-    /// 除算を行う
-    fn divide(&mut self) {
-        let rhs = self.list.pop().unwrap().as_number();
-        let lhs = self.list.pop().unwrap().as_number();
-        self.list.push(Element::Number(lhs / rhs));
-    }
+    // 除算を行う
+    impl_operation!(divide, /);
+
+    // 小なり大小比較を行う
+    impl_operation!(less_than, <);
 
     /// 条件分岐を行う
     fn operation_if(&mut self) {
@@ -85,6 +90,16 @@ impl Stack {
             0 => self.process_multiple(false_branch),
             _ => self.process_multiple(true_branch),
         }
+    }
+
+    /// 変数定義を行う
+    fn operation_define(&mut self) {
+        let element = self.list.pop().unwrap();
+        self.process(element);
+        let element = self.list.pop().unwrap();
+        let symbol = self.list.pop().unwrap().as_symbol();
+
+        self.variables.insert(symbol, element);
     }
 }
 
@@ -143,5 +158,21 @@ mod tests {
         let stack = parse(&mut parser);
 
         assert_eq!(stack.list, vec![Element::Number(100)])
+    }
+
+    #[test]
+    fn test_var() {
+        let mut parser = Parser::new("/x 10 def /y 20 def x y *");
+        let stack = parse(&mut parser);
+
+        assert_eq!(stack.list, vec![Element::Number(200)]);
+    }
+
+    #[test]
+    fn test_var_if() {
+        let mut parser = Parser::new("/x 10 def /y 20 def { x y < } { x } { y } if");
+        let stack = parse(&mut parser);
+
+        assert_eq!(stack.list, vec![Element::Number(10)]);
     }
 }
