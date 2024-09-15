@@ -1,19 +1,28 @@
-use std::vec::IntoIter;
+use std::{collections::VecDeque, vec::IntoIter};
 
 /// パーサー
-pub struct Parser<'a> {
-    iter: IntoIter<&'a str>,
+#[derive(Debug)]
+pub struct Parser {
+    iter: IntoIter<String>,
+    blocks: VecDeque<Block>,
 }
 
-impl<'a> Parser<'a> {
-    pub fn new(line: &'a str) -> Self {
-        let words: Vec<_> = line.split(" ").collect();
+impl Parser {
+    pub fn new() -> Self {
+        Self {
+            iter: Default::default(),
+            blocks: VecDeque::new(),
+        }
+    }
+
+    pub fn parse(&mut self, line: String) {
+        let words: Vec<String> = line.split(" ").map(str::to_string).collect();
         let iter = words.into_iter();
-        Self { iter }
+        self.iter = iter;
     }
 
     pub fn next(&mut self) -> Option<Element> {
-        Element::parses(&mut self.iter)
+        Element::parse(&mut self.iter, &mut self.blocks)
     }
 }
 
@@ -32,19 +41,24 @@ pub enum Element {
 
 impl Element {
     /// パースする
-    fn parses<'a>(iter: &mut IntoIter<&'a str>) -> Option<Element> {
+    fn parse(iter: &mut IntoIter<String>, blocks: &mut VecDeque<Block>) -> Option<Element> {
+        if !blocks.is_empty() {
+            let block = Block::parse(iter, blocks)?;
+            return Some(Element::Block(block));
+        }
+
         let word = iter.next()?;
         if word.is_empty() {
             return None;
         } else if word == "{" {
-            let block = Block::parse(iter)?;
+            let block = Block::parse(iter, blocks)?;
             Some(Element::Block(block))
         } else if let Ok(parsed) = word.parse::<i32>() {
             Some(Element::Number(parsed))
         } else if word.starts_with("/") {
             Some(Element::Symbol(word[1..].to_owned()))
         } else {
-            let operation = Operation::parse(word);
+            let operation = Operation::parse(&word);
             Some(Element::Operation(operation))
         }
     }
@@ -69,6 +83,15 @@ impl Element {
             _ => panic!("Value is not a block"),
         }
     }
+
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::Number(num) => num.to_string(),
+            Self::Operation(operation) => operation.to_string(),
+            Self::Symbol(s) => s.clone(),
+            Self::Block(_) => "<Block>".to_string(),
+        }
+    }
 }
 
 /// 演算の種類
@@ -90,6 +113,8 @@ pub enum Operation {
     Define,
     /// 変数をスタックに入れる
     Push(String),
+    /// スタックの先頭を取り出す
+    Puts,
 }
 
 impl Operation {
@@ -103,7 +128,22 @@ impl Operation {
             "<" => Operation::LightThan,
             "if" => Operation::If,
             "def" => Operation::Define,
+            "puts" => Operation::Puts,
             _ => Operation::Push(word.to_owned()),
+        }
+    }
+
+    fn to_string(&self) -> String {
+        match self {
+            Operation::Add => "Add".to_string(),
+            Operation::Subtract => "Subtract".to_string(),
+            Operation::Multiply => "Multiply".to_string(),
+            Operation::Divide => "Divide".to_string(),
+            Operation::LightThan => "LightThan".to_string(),
+            Operation::If => "If".to_string(),
+            Operation::Define => "Define".to_string(),
+            Operation::Puts => "Puts".to_string(),
+            Operation::Push(_) => "Push".to_string(),
         }
     }
 }
@@ -115,27 +155,53 @@ pub struct Block {
 }
 
 impl Block {
+    fn new() -> Self {
+        Self { tokens: vec![] }
+    }
+
+    fn add(&mut self, element: Element) {
+        self.tokens.push(element);
+    }
+
     /// パースする
-    fn parse<'a>(iter: &mut IntoIter<&'a str>) -> Option<Block> {
-        let mut tokens = vec![];
+    fn parse(iter: &mut IntoIter<String>, blocks: &mut VecDeque<Block>) -> Option<Block> {
+        let mut block = if blocks.is_empty() {
+            Block::new()
+        } else {
+            blocks.pop_back().expect("Block stack underrun!")
+        };
 
         while let Some(word) = iter.next() {
             if word.is_empty() {
-                return None;
+                continue;
             } else if word == "{" {
-                let block = Block::parse(iter)?;
-                tokens.push(Element::Block(block));
+                blocks.push_back(Block::new());
+                if let Some(inner_block) = Block::parse(iter, blocks) {
+                    block.add(Element::Block(inner_block));
+                } else {
+                    break;
+                }
             } else if word == "}" {
-                return Some(Block { tokens });
+                blocks.retain(|b| b != &block);
+                if blocks.is_empty() {
+                    return Some(block);
+                } else {
+                    let mut previous = blocks.pop_back().unwrap();
+                    previous.add(Element::Block(block.clone()));
+                    blocks.push_back(previous);
+                    return Block::parse(iter, blocks);
+                }
             } else if let Ok(parsed) = word.parse::<i32>() {
-                tokens.push(Element::Number(parsed))
+                block.add(Element::Number(parsed))
             } else {
-                let operation = Operation::parse(word);
-                tokens.push(Element::Operation(operation))
+                let operation = Operation::parse(&word);
+                block.add(Element::Operation(operation))
             }
         }
 
-        Some(Block { tokens })
+        blocks.push_front(block);
+
+        None
     }
 
     pub fn to_vec(&self) -> Vec<Element> {
@@ -153,7 +219,8 @@ pub mod tests {
 
     #[test]
     fn test_block() {
-        let mut parser = Parser::new("{ 3 4 }");
+        let mut parser = Parser::new();
+        parser.parse(String::from("{ 3 4 }"));
         let actual = parser.next().unwrap();
 
         assert_eq!(
@@ -166,7 +233,8 @@ pub mod tests {
 
     #[test]
     fn test_group() {
-        let mut parser = Parser::new("1 2 + { 3 4 }");
+        let mut parser = Parser::new();
+        parser.parse(String::from("1 2 + { 3 4 }"));
         let actual = vec![
             parser.next().unwrap(),
             parser.next().unwrap(),

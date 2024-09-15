@@ -18,4 +18,8 @@ impl VirtualMachine {
     pub fn process(&mut self, element: Element) {
         self.stack.process(element);
     }
+
+    pub fn stack(&self) -> &Stack {
+        &self.stack
+    }
 }
