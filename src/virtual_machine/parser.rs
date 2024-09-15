@@ -1,17 +1,17 @@
-use std::{collections::VecDeque, vec::IntoIter};
+use std::vec::IntoIter;
 
 /// パーサー
 #[derive(Debug)]
 pub struct Parser {
     iter: IntoIter<String>,
-    blocks: VecDeque<Block>,
+    blocks: Vec<Block>,
 }
 
 impl Parser {
     pub fn new() -> Self {
         Self {
             iter: Default::default(),
-            blocks: VecDeque::new(),
+            blocks: vec![],
         }
     }
 
@@ -41,7 +41,7 @@ pub enum Element {
 
 impl Element {
     /// パースする
-    fn parse(iter: &mut IntoIter<String>, blocks: &mut VecDeque<Block>) -> Option<Element> {
+    fn parse(iter: &mut IntoIter<String>, blocks: &mut Vec<Block>) -> Option<Element> {
         if !blocks.is_empty() {
             let block = Block::parse(iter, blocks)?;
             return Some(Element::Block(block));
@@ -164,42 +164,35 @@ impl Block {
     }
 
     /// パースする
-    fn parse(iter: &mut IntoIter<String>, blocks: &mut VecDeque<Block>) -> Option<Block> {
-        let mut block = if blocks.is_empty() {
-            Block::new()
-        } else {
-            blocks.pop_back().expect("Block stack underrun!")
-        };
+    fn parse(iter: &mut IntoIter<String>, blocks: &mut Vec<Block>) -> Option<Block> {
+        if blocks.is_empty() {
+            blocks.push(Block::new());
+        }
+
+        let index = blocks.len() - 1;
 
         while let Some(word) = iter.next() {
             if word.is_empty() {
                 continue;
             } else if word == "{" {
-                blocks.push_back(Block::new());
-                if let Some(inner_block) = Block::parse(iter, blocks) {
-                    block.add(Element::Block(inner_block));
-                } else {
-                    break;
-                }
+                blocks.push(Block::new());
+                let inner_block = Block::parse(iter, blocks)?;
+                blocks[index].add(Element::Block(inner_block));
             } else if word == "}" {
-                blocks.retain(|b| b != &block);
+                let block = blocks.pop().unwrap();
                 if blocks.is_empty() {
                     return Some(block);
                 } else {
-                    let mut previous = blocks.pop_back().unwrap();
-                    previous.add(Element::Block(block.clone()));
-                    blocks.push_back(previous);
+                    blocks[index - 1].add(Element::Block(block.clone()));
                     return Block::parse(iter, blocks);
                 }
             } else if let Ok(parsed) = word.parse::<i32>() {
-                block.add(Element::Number(parsed))
+                blocks[index].add(Element::Number(parsed))
             } else {
                 let operation = Operation::parse(&word);
-                block.add(Element::Operation(operation))
+                blocks[index].add(Element::Operation(operation))
             }
         }
-
-        blocks.push_front(block);
 
         None
     }
@@ -252,6 +245,39 @@ pub mod tests {
                     tokens: vec![Element::Number(3), Element::Number(4)]
                 })
             ]
+        );
+    }
+
+    #[test]
+    fn test_multiline() {
+        let mut parser = Parser::new();
+        let mut actual = vec![];
+        let lines = r#"
+{ { 3
+{ 5
+}
+}
+}
+"#;
+        for line in lines.lines() {
+            parser.parse(String::from(line));
+            while let Some(element) = parser.next() {
+                actual.push(element);
+            }
+        }
+
+        assert_eq!(
+            actual,
+            vec![Element::Block(Block {
+                tokens: vec![Element::Block(Block {
+                    tokens: vec![
+                        Element::Number(3),
+                        Element::Block(Block {
+                            tokens: vec![Element::Number(5)]
+                        })
+                    ]
+                })]
+            })]
         );
     }
 }
