@@ -145,6 +145,8 @@ impl Block {
                 }
             } else if let Ok(parsed) = word.parse::<i32>() {
                 blocks[index].add(Element::Number(parsed))
+            } else if word.starts_with("/") {
+                blocks[index].add(Element::Symbol(word[1..].to_owned()))
             } else {
                 blocks[index].add(Element::Operation(word.to_string()))
             }

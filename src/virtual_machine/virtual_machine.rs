@@ -19,6 +19,7 @@ impl VirtualMachine {
         self.stack.process(element);
     }
 
+    /// スタックを返す
     pub fn stack(&self) -> &Stack {
         &self.stack
     }

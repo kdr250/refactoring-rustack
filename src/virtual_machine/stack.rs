@@ -6,7 +6,7 @@ use super::{stack_helper::impl_operation, Element, NativeOperation};
 #[derive(Debug)]
 pub struct Stack {
     list: Vec<Element>,
-    variables: HashMap<String, Element>,
+    variables: Vec<HashMap<String, Element>>,
 }
 
 impl Stack {
@@ -28,7 +28,7 @@ impl Stack {
         ];
         Self {
             list: vec![],
-            variables: functions
+            variables: vec![functions
                 .into_iter()
                 .map(|(name, function)| {
                     (
@@ -36,7 +36,7 @@ impl Stack {
                         Element::NativeOperation(NativeOperation(function)),
                     )
                 })
-                .collect(),
+                .collect()],
         }
     }
 
@@ -65,19 +65,28 @@ impl Stack {
         self.list.push(element);
     }
 
+    /// 変数を見つける
+    fn find_variable(&self, name: &str) -> Option<Element> {
+        self.variables
+            .iter()
+            .rev()
+            .find_map(|vars| vars.get(name).map(|var| var.to_owned()))
+    }
+
     /// 演算を実行する
     fn execute(&mut self, operation: String) {
         let element = self
-            .variables
-            .get(&operation)
+            .find_variable(&operation)
             .expect(&format!("{operation:?} is undefined"))
             .clone();
 
         match element {
             Element::Block(block) => {
+                self.variables.push(HashMap::new());
                 for inner_element in block.to_vec() {
                     self.process(inner_element);
                 }
+                self.variables.pop();
             }
             Element::NativeOperation(operation) => (operation.0)(self),
             _ => self.list.push(element),
@@ -122,7 +131,7 @@ impl Stack {
         let element = self.list.pop().unwrap();
         let symbol = self.list.pop().unwrap().as_symbol();
 
-        self.variables.insert(symbol, element);
+        self.variables.last_mut().unwrap().insert(symbol, element);
     }
 
     /// スタックの先頭を取り出して表示する
