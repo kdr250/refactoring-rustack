@@ -1,5 +1,7 @@
 use std::vec::IntoIter;
 
+use super::stack::Stack;
+
 /// パーサー
 #[derive(Debug)]
 pub struct Parser {
@@ -31,12 +33,14 @@ impl Parser {
 pub enum Element {
     /// 数値
     Number(i32),
-    /// 演算子
-    Operation(Operation),
+    /// 演算
+    Operation(String),
     /// シンボル
     Symbol(String),
     /// ブロック
     Block(Block),
+    /// 組み込みの演算
+    NativeOperation(NativeOperation),
 }
 
 impl Element {
@@ -58,8 +62,7 @@ impl Element {
         } else if word.starts_with("/") {
             Some(Element::Symbol(word[1..].to_owned()))
         } else {
-            let operation = Operation::parse(&word);
-            Some(Element::Operation(operation))
+            Some(Element::Operation(word.to_string()))
         }
     }
 
@@ -90,63 +93,13 @@ impl Element {
             Self::Operation(operation) => operation.to_string(),
             Self::Symbol(s) => s.clone(),
             Self::Block(_) => "<Block>".to_string(),
+            Self::NativeOperation(_) => "<NativeOp>".to_string(),
         }
     }
 }
 
-/// 演算の種類
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub enum Operation {
-    /// 加算
-    Add,
-    /// 減算
-    Subtract,
-    /// 乗算
-    Multiply,
-    /// 除算
-    Divide,
-    /// 小なり
-    LightThan,
-    /// 条件分岐
-    If,
-    /// 変数定義
-    Define,
-    /// 変数をスタックに入れる
-    Push(String),
-    /// スタックの先頭を取り出す
-    Puts,
-}
-
-impl Operation {
-    /// パースする
-    fn parse(word: &str) -> Operation {
-        match word {
-            "+" => Operation::Add,
-            "-" => Operation::Subtract,
-            "*" => Operation::Multiply,
-            "/" => Operation::Divide,
-            "<" => Operation::LightThan,
-            "if" => Operation::If,
-            "def" => Operation::Define,
-            "puts" => Operation::Puts,
-            _ => Operation::Push(word.to_owned()),
-        }
-    }
-
-    fn to_string(&self) -> String {
-        match self {
-            Operation::Add => "Add".to_string(),
-            Operation::Subtract => "Subtract".to_string(),
-            Operation::Multiply => "Multiply".to_string(),
-            Operation::Divide => "Divide".to_string(),
-            Operation::LightThan => "LightThan".to_string(),
-            Operation::If => "If".to_string(),
-            Operation::Define => "Define".to_string(),
-            Operation::Puts => "Puts".to_string(),
-            Operation::Push(_) => "Push".to_string(),
-        }
-    }
-}
+#[derive(Debug, PartialEq, Clone)]
+pub struct NativeOperation(pub fn(&mut Stack));
 
 /// ブロック要素を表す構造体
 #[derive(Debug, PartialEq, Clone)]
@@ -193,8 +146,7 @@ impl Block {
             } else if let Ok(parsed) = word.parse::<i32>() {
                 blocks[index].add(Element::Number(parsed))
             } else {
-                let operation = Operation::parse(&word);
-                blocks[index].add(Element::Operation(operation))
+                blocks[index].add(Element::Operation(word.to_string()))
             }
         }
 
@@ -208,7 +160,7 @@ impl Block {
 
 #[cfg(test)]
 pub mod tests {
-    use super::{Block, Element, Operation, Parser};
+    use super::{Block, Element, Parser};
 
     pub fn helper_create_block(tokens: Vec<Element>) -> Block {
         Block { tokens }
@@ -244,7 +196,7 @@ pub mod tests {
             vec![
                 Element::Number(1),
                 Element::Number(2),
-                Element::Operation(Operation::Add),
+                Element::Operation("+".to_string()),
                 Element::Block(Block {
                     tokens: vec![Element::Number(3), Element::Number(4)]
                 })

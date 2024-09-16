@@ -39,6 +39,6 @@ fn parse_interactive() {
             virtual_machine.process(element);
         }
 
-        println!("stack: {:?}", virtual_machine.stack());
+        println!("stack: {:?}", virtual_machine.stack().list());
     }
 }

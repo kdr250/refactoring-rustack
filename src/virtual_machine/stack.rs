@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::{parser::Operation, stack_helper::impl_operation, Element};
+use super::{stack_helper::impl_operation, Element, NativeOperation};
 
 /// スタック
 #[derive(Debug)]
@@ -12,10 +12,36 @@ pub struct Stack {
 impl Stack {
     /// スタックを生成する
     pub fn new() -> Self {
+        let functions: [(&str, fn(&mut Stack)); 12] = [
+            ("+", Stack::add),
+            ("-", Stack::subtract),
+            ("*", Stack::multiply),
+            ("/", Stack::divide),
+            ("<", Stack::less_than),
+            ("if", Stack::operation_if),
+            ("def", Stack::operation_define),
+            ("puts", Stack::puts),
+            ("pop", Stack::pop),
+            ("dup", Stack::duplicate),
+            ("exch", Stack::exchange),
+            ("index", Stack::index),
+        ];
         Self {
             list: vec![],
-            variables: HashMap::new(),
+            variables: functions
+                .into_iter()
+                .map(|(name, function)| {
+                    (
+                        name.to_string(),
+                        Element::NativeOperation(NativeOperation(function)),
+                    )
+                })
+                .collect(),
         }
+    }
+
+    pub fn list(&self) -> &Vec<Element> {
+        &self.list
     }
 
     ///　要素を処理する
@@ -23,6 +49,7 @@ impl Stack {
         match element {
             Element::Number(_) | Element::Block(_) | Element::Symbol(_) => self.push(element),
             Element::Operation(operation) => self.execute(operation),
+            _ => panic!("Invalid element type"),
         }
     }
 
@@ -38,27 +65,22 @@ impl Stack {
         self.list.push(element);
     }
 
-    /// 変数マップから要素を取得してスタックに入れる
-    fn push_variable(&mut self, variable: String) {
+    /// 演算を実行する
+    fn execute(&mut self, operation: String) {
         let element = self
             .variables
-            .get(&variable)
-            .expect(&format!("{variable:?} is not a defined operation"));
-        self.push(element.clone());
-    }
+            .get(&operation)
+            .expect(&format!("{operation:?} is undefined"))
+            .clone();
 
-    /// 演算を実行する
-    fn execute(&mut self, operation: Operation) {
-        match operation {
-            Operation::Add => self.add(),
-            Operation::Subtract => self.subtract(),
-            Operation::Multiply => self.multiply(),
-            Operation::Divide => self.divide(),
-            Operation::LightThan => self.less_than(),
-            Operation::If => self.operation_if(),
-            Operation::Define => self.operation_define(),
-            Operation::Push(variable) => self.push_variable(variable),
-            Operation::Puts => self.puts(),
+        match element {
+            Element::Block(block) => {
+                for inner_element in block.to_vec() {
+                    self.process(inner_element);
+                }
+            }
+            Element::NativeOperation(operation) => (operation.0)(self),
+            _ => self.list.push(element),
         }
     }
 
@@ -107,6 +129,32 @@ impl Stack {
     fn puts(&mut self) {
         let element = self.list.pop().unwrap();
         println!("{}", element.to_string());
+    }
+
+    /// スタックの先頭を取り出す
+    fn pop(&mut self) {
+        self.list.pop().unwrap();
+    }
+
+    /// スタックの先頭を複製する
+    fn duplicate(&mut self) {
+        let element = self.list.last().unwrap();
+        self.list.push(element.clone());
+    }
+
+    /// スタックの先頭と先頭から2番目を交換する
+    fn exchange(&mut self) {
+        let last = self.list.pop().unwrap();
+        let second = self.list.pop().unwrap();
+        self.list.push(last);
+        self.list.push(second);
+    }
+
+    /// インデックス
+    fn index(&mut self) {
+        let index = self.list.pop().unwrap().as_number() as usize;
+        let element = self.list[self.list.len() - index - 1].clone();
+        self.list.push(element);
     }
 }
 
@@ -209,5 +257,24 @@ if
         }
 
         assert_eq!(stack.list, vec![Element::Number(10)]);
+    }
+
+    #[test]
+    fn test_function() {
+        let mut stack = Stack::new();
+        let mut parser = Parser::new();
+        let lines = r#"
+/double { 2 * } def
+10 double
+"#;
+
+        for line in lines.lines() {
+            parser.parse(line.to_string());
+            while let Some(element) = parser.next() {
+                stack.process(element);
+            }
+        }
+
+        assert_eq!(stack.list, vec![Element::Number(20)]);
     }
 }
