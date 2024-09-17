@@ -1,9 +1,11 @@
 use std::io::BufRead;
 use std::io::BufReader;
 
-use virtual_machine::Parser;
+use parser::Parser;
 use virtual_machine::VirtualMachine;
 
+mod element;
+mod parser;
 mod virtual_machine;
 
 fn main() {

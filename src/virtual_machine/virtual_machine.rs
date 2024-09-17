@@ -1,4 +1,5 @@
-use super::{stack::Stack, Element};
+use super::super::element::Element;
+use super::stack::Stack;
 
 /// スタックベース仮想マシン
 #[derive(Debug)]

@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
-use super::{stack_helper::impl_operation, Element, NativeOperation};
+use crate::element::{Element, NativeOperation};
+
+use super::stack_helper::impl_operation;
 
 /// スタック
 #[derive(Debug)]
@@ -169,8 +171,9 @@ impl Stack {
 
 #[cfg(test)]
 mod tests {
-    use super::super::parser::{tests::helper_create_block, Element, Parser};
     use super::Stack;
+    use crate::element::{Block, Element};
+    use crate::parser::Parser;
 
     fn parse(parser: &mut Parser) -> Stack {
         let mut stack = Stack::new();
@@ -201,10 +204,7 @@ mod tests {
             stack.list,
             vec![
                 Element::Number(3),
-                Element::Block(helper_create_block(vec![
-                    Element::Number(3),
-                    Element::Number(4)
-                ]))
+                Element::Block(Block::from(vec![Element::Number(3), Element::Number(4)]))
             ]
         )
     }
