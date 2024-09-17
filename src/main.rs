@@ -24,8 +24,7 @@ fn parse_batch(source: impl BufRead) {
     let mut parser = Parser::new();
 
     for line in source.lines().flatten() {
-        parser.parse(line);
-        while let Some(element) = parser.next() {
+        for element in parser.parse(line) {
             virtual_machine.process(element);
         }
     }
@@ -36,8 +35,7 @@ fn parse_interactive() {
     let mut parser = Parser::new();
 
     for line in std::io::stdin().lines().flatten() {
-        parser.parse(line);
-        while let Some(element) = parser.next() {
+        for element in parser.parse(line) {
             virtual_machine.process(element);
         }
 

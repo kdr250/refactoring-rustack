@@ -1,4 +1,8 @@
-use std::vec::IntoIter;
+use std::{
+    cell::{RefCell, RefMut},
+    rc::Rc,
+    vec::IntoIter,
+};
 
 use crate::virtual_machine::Stack;
 
@@ -19,9 +23,13 @@ pub enum Element {
 
 impl Element {
     /// パースする
-    pub fn parse(iter: &mut IntoIter<String>, blocks: &mut Vec<Block>) -> Option<Element> {
-        if !blocks.is_empty() {
-            let block = Block::parse(iter, blocks)?;
+    pub fn parse(
+        iter: &mut IntoIter<String>,
+        blocks: &mut Rc<RefCell<Vec<Block>>>,
+    ) -> Option<Element> {
+        let mut borrowed = blocks.borrow_mut();
+        if !borrowed.is_empty() {
+            let block = Block::parse(iter, &mut borrowed)?;
             return Some(Element::Block(block));
         }
 
@@ -29,7 +37,7 @@ impl Element {
         if word.is_empty() {
             return None;
         } else if word == "{" {
-            let block = Block::parse(iter, blocks)?;
+            let block = Block::parse(iter, &mut borrowed)?;
             Some(Element::Block(block))
         } else if let Ok(parsed) = word.parse::<i32>() {
             Some(Element::Number(parsed))
@@ -96,7 +104,7 @@ impl Block {
     }
 
     /// パースする
-    fn parse(iter: &mut IntoIter<String>, blocks: &mut Vec<Block>) -> Option<Block> {
+    fn parse(iter: &mut IntoIter<String>, blocks: &mut RefMut<Vec<Block>>) -> Option<Block> {
         if blocks.is_empty() {
             blocks.push(Block::new());
         }

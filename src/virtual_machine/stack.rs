@@ -173,11 +173,11 @@ impl Stack {
 mod tests {
     use super::Stack;
     use crate::element::{Block, Element};
-    use crate::parser::Parser;
+    use crate::parser::{Parser, ParserIterator};
 
-    fn parse(parser: &mut Parser) -> Stack {
+    fn parse(parser: &mut ParserIterator) -> Stack {
         let mut stack = Stack::new();
-        while let Some(element) = parser.next() {
+        for element in parser {
             stack.process(element);
         }
         stack
@@ -197,8 +197,8 @@ mod tests {
     #[test]
     fn test_process() {
         let mut parser = Parser::new();
-        parser.parse(String::from("1 2 + { 3 4 }"));
-        let stack = parse(&mut parser);
+        let mut iter = parser.parse(String::from("1 2 + { 3 4 }"));
+        let stack = parse(&mut iter);
 
         assert_eq!(
             stack.list,
@@ -212,8 +212,8 @@ mod tests {
     #[test]
     fn test_if_true() {
         let mut parser = Parser::new();
-        parser.parse(String::from("{ 1 -1 + } { 100 } { -100 } if"));
-        let stack = parse(&mut parser);
+        let mut iter = parser.parse(String::from("{ 1 -1 + } { 100 } { -100 } if"));
+        let stack = parse(&mut iter);
 
         assert_eq!(stack.list, vec![Element::Number(-100)])
     }
@@ -221,8 +221,8 @@ mod tests {
     #[test]
     fn test_if_false() {
         let mut parser = Parser::new();
-        parser.parse(String::from("{ 1 1 + } { 100 } { -100 } if"));
-        let stack = parse(&mut parser);
+        let mut iter = parser.parse(String::from("{ 1 1 + } { 100 } { -100 } if"));
+        let stack = parse(&mut iter);
 
         assert_eq!(stack.list, vec![Element::Number(100)])
     }
@@ -230,8 +230,8 @@ mod tests {
     #[test]
     fn test_var() {
         let mut parser = Parser::new();
-        parser.parse(String::from("/x 10 def /y 20 def x y *"));
-        let stack = parse(&mut parser);
+        let mut iter = parser.parse(String::from("/x 10 def /y 20 def x y *"));
+        let stack = parse(&mut iter);
 
         assert_eq!(stack.list, vec![Element::Number(200)]);
     }
@@ -239,8 +239,8 @@ mod tests {
     #[test]
     fn test_var_if() {
         let mut parser = Parser::new();
-        parser.parse(String::from("/x 10 def /y 20 def { x y < } { x } { y } if"));
-        let stack = parse(&mut parser);
+        let mut iter = parser.parse(String::from("/x 10 def /y 20 def { x y < } { x } { y } if"));
+        let stack = parse(&mut iter);
 
         assert_eq!(stack.list, vec![Element::Number(10)]);
     }
@@ -259,8 +259,7 @@ mod tests {
 if
 "#;
         for line in lines.lines() {
-            parser.parse(line.to_string());
-            while let Some(element) = parser.next() {
+            for element in parser.parse(line.to_string()) {
                 stack.process(element);
             }
         }
@@ -278,8 +277,7 @@ if
 "#;
 
         for line in lines.lines() {
-            parser.parse(line.to_string());
-            while let Some(element) = parser.next() {
+            for element in parser.parse(line.to_string()) {
                 stack.process(element);
             }
         }

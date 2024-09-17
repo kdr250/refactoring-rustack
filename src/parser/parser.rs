@@ -1,29 +1,40 @@
-use std::vec::IntoIter;
+use std::{cell::RefCell, rc::Rc, vec::IntoIter};
 
 use crate::element::{Block, Element};
 
 /// パーサー
 #[derive(Debug)]
 pub struct Parser {
-    iter: IntoIter<String>,
-    blocks: Vec<Block>,
+    blocks: Rc<RefCell<Vec<Block>>>,
 }
 
 impl Parser {
     pub fn new() -> Self {
         Self {
-            iter: Default::default(),
-            blocks: vec![],
+            blocks: Rc::new(RefCell::new(vec![])),
         }
     }
 
-    pub fn parse(&mut self, line: String) {
+    pub fn parse(&mut self, line: String) -> ParserIterator {
         let words: Vec<String> = line.split(" ").map(str::to_string).collect();
-        let iter = words.into_iter();
-        self.iter = iter;
-    }
 
-    pub fn next(&mut self) -> Option<Element> {
+        ParserIterator {
+            iter: words.into_iter(),
+            blocks: self.blocks.clone(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct ParserIterator {
+    iter: IntoIter<String>,
+    blocks: Rc<RefCell<Vec<Block>>>,
+}
+
+impl Iterator for ParserIterator {
+    type Item = Element;
+
+    fn next(&mut self) -> Option<Self::Item> {
         Element::parse(&mut self.iter, &mut self.blocks)
     }
 }
@@ -35,8 +46,8 @@ pub mod tests {
     #[test]
     fn test_block() {
         let mut parser = Parser::new();
-        parser.parse(String::from("{ 3 4 }"));
-        let actual = parser.next().unwrap();
+        let mut iter = parser.parse(String::from("{ 3 4 }"));
+        let actual = iter.next().unwrap();
 
         assert_eq!(
             actual,
@@ -47,12 +58,12 @@ pub mod tests {
     #[test]
     fn test_group() {
         let mut parser = Parser::new();
-        parser.parse(String::from("1 2 + { 3 4 }"));
+        let mut iter = parser.parse(String::from("1 2 + { 3 4 }"));
         let actual = vec![
-            parser.next().unwrap(),
-            parser.next().unwrap(),
-            parser.next().unwrap(),
-            parser.next().unwrap(),
+            iter.next().unwrap(),
+            iter.next().unwrap(),
+            iter.next().unwrap(),
+            iter.next().unwrap(),
         ];
 
         assert_eq!(
@@ -69,8 +80,8 @@ pub mod tests {
     #[test]
     fn test_group2() {
         let mut parser = Parser::new();
-        parser.parse(String::from("{ { 3 } 4 }"));
-        let actual = vec![parser.next().unwrap()];
+        let mut iter = parser.parse(String::from("{ { 3 } 4 }"));
+        let actual = vec![iter.next().unwrap()];
 
         assert_eq!(
             actual,
@@ -93,8 +104,7 @@ pub mod tests {
 }
 "#;
         for line in lines.lines() {
-            parser.parse(String::from(line));
-            while let Some(element) = parser.next() {
+            for element in parser.parse(String::from(line)) {
                 actual.push(element);
             }
         }
