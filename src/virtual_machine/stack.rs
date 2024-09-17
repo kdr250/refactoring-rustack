@@ -85,9 +85,7 @@ impl Stack {
         match element {
             Element::Block(block) => {
                 self.variables.push(HashMap::new());
-                for inner_element in block.to_vec() {
-                    self.process(inner_element);
-                }
+                self.process_multiple(block.to_vec());
                 self.variables.pop();
             }
             Element::NativeOperation(operation) => (operation.0)(self),
