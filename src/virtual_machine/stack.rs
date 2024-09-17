@@ -172,7 +172,8 @@ impl Stack {
 #[cfg(test)]
 mod tests {
     use super::Stack;
-    use crate::element::{Block, Element};
+    use crate::element::tests::create_block;
+    use crate::element::Element;
     use crate::parser::{Parser, ParserIterator};
 
     fn parse(parser: &mut ParserIterator) -> Stack {
@@ -204,7 +205,7 @@ mod tests {
             stack.list,
             vec![
                 Element::Number(3),
-                Element::Block(Block::from(vec![Element::Number(3), Element::Number(4)]))
+                Element::Block(create_block(vec![Element::Number(3), Element::Number(4)]))
             ]
         )
     }

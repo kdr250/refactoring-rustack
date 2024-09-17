@@ -13,10 +13,6 @@ impl Block {
         Self { tokens: vec![] }
     }
 
-    pub fn from(tokens: Vec<Element>) -> Self {
-        Self { tokens }
-    }
-
     fn add(&mut self, element: Element) {
         self.tokens.push(element);
     }
@@ -62,5 +58,71 @@ impl Block {
 
     pub fn to_vec(&self) -> Vec<Element> {
         self.tokens.clone()
+    }
+}
+
+#[cfg(test)]
+pub mod tests {
+    use crate::Parser;
+
+    use super::{Block, Element};
+
+    pub fn create_block(tokens: Vec<Element>) -> Block {
+        Block { tokens }
+    }
+
+    #[test]
+    fn test_block() {
+        let mut parser = Parser::new();
+        let mut iter = parser.parse(String::from("{ 3 4 }"));
+        let actual = iter.next().unwrap();
+
+        assert_eq!(
+            actual,
+            Element::Block(create_block(vec![Element::Number(3), Element::Number(4)]))
+        );
+    }
+
+    #[test]
+    fn test_group2() {
+        let mut parser = Parser::new();
+        let iter = parser.parse(String::from("{ { 3 } 4 }"));
+        let actual: Vec<Element> = iter.collect();
+
+        assert_eq!(
+            actual,
+            vec![Element::Block(create_block(vec![
+                Element::Block(create_block(vec![Element::Number(3)])),
+                Element::Number(4)
+            ]))]
+        );
+    }
+
+    #[test]
+    fn test_multiline() {
+        let mut parser = Parser::new();
+        let mut actual = vec![];
+        let lines = r#"
+{ { 3
+{ 5
+}
+}
+}
+"#;
+        for line in lines.lines() {
+            for element in parser.parse(String::from(line)) {
+                actual.push(element);
+            }
+        }
+
+        assert_eq!(
+            actual,
+            vec![Element::Block(create_block(vec![Element::Block(
+                create_block(vec![
+                    Element::Number(3),
+                    Element::Block(create_block(vec![Element::Number(5)]))
+                ])
+            )]))]
+        );
     }
 }

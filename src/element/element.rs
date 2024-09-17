@@ -76,3 +76,27 @@ impl Element {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Element;
+    use crate::element::tests::create_block;
+    use crate::Parser;
+
+    #[test]
+    fn test_group() {
+        let mut parser = Parser::new();
+        let iter = parser.parse(String::from("1 2 + { 3 4 }"));
+        let actual: Vec<Element> = iter.collect();
+
+        assert_eq!(
+            actual,
+            vec![
+                Element::Number(1),
+                Element::Number(2),
+                Element::Operation("+".to_string()),
+                Element::Block(create_block(vec![Element::Number(3), Element::Number(4)]))
+            ]
+        );
+    }
+}
