@@ -14,7 +14,7 @@ pub struct Stack {
 impl Stack {
     /// スタックを生成する
     pub fn new() -> Self {
-        let functions: [(&str, fn(&mut Stack)); 12] = [
+        let functions: [(&str, fn(&mut Stack)); 13] = [
             ("+", Stack::add),
             ("-", Stack::subtract),
             ("*", Stack::multiply),
@@ -22,6 +22,7 @@ impl Stack {
             ("<", Stack::less_than),
             ("if", Stack::operation_if),
             ("def", Stack::operation_define),
+            ("while", Stack::operation_while),
             ("puts", Stack::puts),
             ("pop", Stack::pop),
             ("dup", Stack::duplicate),
@@ -132,6 +133,20 @@ impl Stack {
         let symbol = self.list.pop().unwrap().as_symbol();
 
         self.variables.last_mut().unwrap().insert(symbol, element);
+    }
+
+    /// 繰り返し操作を行う
+    fn operation_while(&mut self) {
+        let loop_block = self.list.pop().unwrap().to_block_vec();
+        let condition = self.list.pop().unwrap().to_block_vec();
+        self.evaluate_multiple(condition.clone());
+        let mut condition_result = self.list.pop().unwrap().as_number();
+
+        while condition_result == 1 {
+            self.evaluate_multiple(loop_block.clone());
+            self.evaluate_multiple(condition.clone());
+            condition_result = self.list.pop().unwrap().as_number();
+        }
     }
 
     /// スタックの先頭を取り出して表示する
@@ -282,5 +297,16 @@ if
         }
 
         assert_eq!(stack.list, vec![Element::Number(20)]);
+    }
+
+    #[test]
+    fn test_while() {
+        let mut parser = Parser::new();
+        let mut iter = parser.parse(String::from(
+            "/x 0 def { x 3 < } { x 1 + /x exch def } while x",
+        ));
+        let stack = parse(&mut iter);
+
+        assert_eq!(stack.list, vec![Element::Number(3)]);
     }
 }
