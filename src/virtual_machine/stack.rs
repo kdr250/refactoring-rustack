@@ -20,9 +20,9 @@ impl Stack {
             ("*", Stack::multiply),
             ("/", Stack::divide),
             ("<", Stack::less_than),
-            ("if", Stack::operation_if),
-            ("def", Stack::operation_define),
-            ("while", Stack::operation_while),
+            ("if", Stack::operate_if),
+            ("def", Stack::operate_define),
+            ("while", Stack::operate_while),
             ("puts", Stack::puts),
             ("pop", Stack::pop),
             ("dup", Stack::duplicate),
@@ -110,7 +110,7 @@ impl Stack {
     impl_operation!(less_than, <);
 
     /// 条件分岐を行う
-    fn operation_if(&mut self) {
+    fn operate_if(&mut self) {
         let false_branch = self.list.pop().unwrap().to_block_vec();
         let true_branch = self.list.pop().unwrap().to_block_vec();
         let condition = self.list.pop().unwrap().to_block_vec();
@@ -126,7 +126,7 @@ impl Stack {
     }
 
     /// 変数定義を行う
-    fn operation_define(&mut self) {
+    fn operate_define(&mut self) {
         let element = self.list.pop().unwrap();
         self.evaluate(element);
         let element = self.list.pop().unwrap();
@@ -136,7 +136,7 @@ impl Stack {
     }
 
     /// 繰り返し操作を行う
-    fn operation_while(&mut self) {
+    fn operate_while(&mut self) {
         let loop_block = self.list.pop().unwrap().to_block_vec();
         let condition = self.list.pop().unwrap().to_block_vec();
         self.evaluate_multiple(condition.clone());
