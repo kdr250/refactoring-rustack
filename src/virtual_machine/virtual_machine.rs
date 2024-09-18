@@ -1,14 +1,14 @@
 use super::super::element::Element;
 use super::stack::Stack;
 
-/// スタックベース仮想マシン
+/// 仮想マシン
 #[derive(Debug)]
 pub struct VirtualMachine {
     stack: Stack,
 }
 
 impl VirtualMachine {
-    /// スタックベース仮想マシンを生成する
+    /// 仮想マシンを生成する
     pub fn new() -> Self {
         Self {
             stack: Stack::new(),
