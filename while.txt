@@ -1,0 +1,14 @@
+/x 0 def
+
+{
+    x 100 <
+}
+{
+    x 1 +
+    /x exch def
+}
+while
+
+x
+
+puts

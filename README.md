@@ -14,6 +14,9 @@
 `cargo run fibonacci.txt`<br>
 -> 55 を出力する
 
+`cargo run while.txt`<br>
+-> 100 を出力する
+
 ## 参考URL
 - [GitHub - rustack](https://github.com/msakuta/rustack)
 - [技術評論社 Rustで作るプログラミング言語 - コンパイラ／インタプリタの基礎からプログラミング言語の新潮流まで](https://gihyo.jp/book/2024/978-4-297-14192-9)
