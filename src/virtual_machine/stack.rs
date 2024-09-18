@@ -142,7 +142,7 @@ impl Stack {
         self.evaluate_multiple(condition.clone());
         let mut condition_result = self.list.pop().unwrap().as_number();
 
-        while condition_result == 1 {
+        while condition_result != 0 {
             self.evaluate_multiple(loop_block.clone());
             self.evaluate_multiple(condition.clone());
             condition_result = self.list.pop().unwrap().as_number();
