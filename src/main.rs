@@ -19,24 +19,26 @@ fn main() {
     }
 }
 
+/// 一括でパースして処理する
 fn parse_batch(source: impl BufRead) {
     let mut virtual_machine = VirtualMachine::new();
     let mut parser = Parser::new();
 
     for line in source.lines().flatten() {
         for element in parser.parse(line) {
-            virtual_machine.process(element);
+            virtual_machine.evaluate(element);
         }
     }
 }
 
+/// 標準入力をインタラクティブにパースして処理する
 fn parse_interactive() {
     let mut virtual_machine = VirtualMachine::new();
     let mut parser = Parser::new();
 
     for line in std::io::stdin().lines().flatten() {
         for element in parser.parse(line) {
-            virtual_machine.process(element);
+            virtual_machine.evaluate(element);
         }
 
         println!("stack: {:?}", virtual_machine.stack().list());

@@ -46,8 +46,8 @@ impl Stack {
         &self.list
     }
 
-    ///　要素を処理する
-    pub fn process(&mut self, element: Element) {
+    /// 要素を評価する
+    pub fn evaluate(&mut self, element: Element) {
         match element {
             Element::Number(_) | Element::Block(_) | Element::Symbol(_) => self.push(element),
             Element::Operation(operation) => self.execute(operation),
@@ -55,10 +55,10 @@ impl Stack {
         }
     }
 
-    ///　要素を複数処理する
-    fn process_multiple(&mut self, elements: Vec<Element>) {
+    /// 複数の要素を評価する
+    fn evaluate_multiple(&mut self, elements: Vec<Element>) {
         for element in elements {
-            self.process(element);
+            self.evaluate(element);
         }
     }
 
@@ -85,7 +85,7 @@ impl Stack {
         match element {
             Element::Block(block) => {
                 self.variables.push(HashMap::new());
-                self.process_multiple(block.to_vec());
+                self.evaluate_multiple(block.to_vec());
                 self.variables.pop();
             }
             Element::NativeOperation(operation) => (operation.0)(self),
@@ -114,20 +114,20 @@ impl Stack {
         let true_branch = self.list.pop().unwrap().to_block_vec();
         let condition = self.list.pop().unwrap().to_block_vec();
 
-        self.process_multiple(condition);
+        self.evaluate_multiple(condition);
 
         let condition_result = self.list.pop().unwrap().as_number();
 
         match condition_result {
-            0 => self.process_multiple(false_branch),
-            _ => self.process_multiple(true_branch),
+            0 => self.evaluate_multiple(false_branch),
+            _ => self.evaluate_multiple(true_branch),
         }
     }
 
     /// 変数定義を行う
     fn operation_define(&mut self) {
         let element = self.list.pop().unwrap();
-        self.process(element);
+        self.evaluate(element);
         let element = self.list.pop().unwrap();
         let symbol = self.list.pop().unwrap().as_symbol();
 
@@ -177,7 +177,7 @@ mod tests {
     fn parse(parser: &mut ParserIterator) -> Stack {
         let mut stack = Stack::new();
         for element in parser {
-            stack.process(element);
+            stack.evaluate(element);
         }
         stack
     }
@@ -259,7 +259,7 @@ if
 "#;
         for line in lines.lines() {
             for element in parser.parse(line.to_string()) {
-                stack.process(element);
+                stack.evaluate(element);
             }
         }
 
@@ -277,7 +277,7 @@ if
 
         for line in lines.lines() {
             for element in parser.parse(line.to_string()) {
-                stack.process(element);
+                stack.evaluate(element);
             }
         }
 

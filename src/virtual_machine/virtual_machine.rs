@@ -15,9 +15,9 @@ impl VirtualMachine {
         }
     }
 
-    ///　要素を処理する
-    pub fn process(&mut self, element: Element) {
-        self.stack.process(element);
+    ///　要素を評価する
+    pub fn evaluate(&mut self, element: Element) {
+        self.stack.evaluate(element);
     }
 
     /// スタックを返す
