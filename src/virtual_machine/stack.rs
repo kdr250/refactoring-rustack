@@ -51,7 +51,7 @@ impl Stack {
         match element {
             Element::Number(_) | Element::Block(_) | Element::Symbol(_) => self.push(element),
             Element::Operation(operation) => self.execute(operation),
-            _ => panic!("Invalid element type"),
+            Element::NativeOperation(_) => panic!("Native operation is not allowed!"),
         }
     }
 
