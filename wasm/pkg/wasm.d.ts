@@ -1,22 +1,24 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
-* @param {string} name
 */
-export function greet(name: string): void;
+export function set_panic_hook(): void;
 /**
+* @param {string} code
+* @returns {(string)[]}
 */
-export function evaluate(): void;
+export function evaluate(code: string): (string)[];
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly greet: (a: number, b: number) => void;
-  readonly evaluate: () => void;
+  readonly evaluate: (a: number, b: number, c: number) => void;
+  readonly set_panic_hook: () => void;
+  readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
-  readonly __wbindgen_start: () => void;
+  readonly __wbindgen_free: (a: number, b: number, c: number) => void;
 }
 
 export type SyncInitInput = BufferSource | WebAssembly.Module;
