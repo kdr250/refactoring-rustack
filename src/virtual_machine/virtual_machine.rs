@@ -24,4 +24,9 @@ impl VirtualMachine {
     pub fn stack(&self) -> &Stack {
         &self.stack
     }
+
+    /// 出力
+    pub fn output(&self) -> Vec<String> {
+        self.stack.list().iter().map(|e| e.to_string()).collect()
+    }
 }

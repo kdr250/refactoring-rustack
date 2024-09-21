@@ -90,7 +90,7 @@ impl Stack {
                 self.variables.pop();
             }
             Element::NativeOperation(operation) => (operation.0)(self),
-            _ => self.list.push(element),
+            _ => self.push(element),
         }
     }
 
