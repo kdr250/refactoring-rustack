@@ -14,17 +14,7 @@
 </head>
 
 <body id="wasm-example">
-    <script type="module">
-        import init from "./wasm.js";
-        init().then(() => {
-            console.log("WASM Loaded");
-        }).catch((error) => {
-            if (!error.message.startsWith("Using exceptions for control flow,")) {
-                throw error;
-            }
-            console.log("WASM Loaded");
-        });
-    </script>
+    <script src="./index.js"></script>
 </body>
 
 </html>

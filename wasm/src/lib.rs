@@ -9,6 +9,13 @@ extern "C" {
     fn alert(s: &str);
 }
 
+// Export a `greet` function from Rust to JavaScript, that alerts a
+// hello message.
+#[wasm_bindgen]
+pub fn greet(name: &str) {
+    alert(&format!("Hello, {}!", name));
+}
+
 #[wasm_bindgen(start)]
 pub fn evaluate() {
     let mut virtual_machine = VirtualMachine::new();
