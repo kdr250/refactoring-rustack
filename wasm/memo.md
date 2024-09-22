@@ -8,4 +8,5 @@
 => index.html、index.js、main.jsは自分で書いた
 
 ## ブラウザで確認
-`python3 -m http.server 8080 -d pkg`
+`python3 -m http.server 8080 -d pkg`<br>
+=> ブラウザで `http://localhost:8080/index.html` で確認する。 
