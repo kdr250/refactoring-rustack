@@ -194,7 +194,7 @@ impl Stack {
 
     /// インデックス
     fn index(&mut self) {
-        let index = self.list.pop().unwrap().as_number() as usize;
+        let index = self.list.pop().unwrap().as_integer() as usize;
         let element = self.list[self.list.len() - index - 1].clone();
         self.list.push(element);
     }
