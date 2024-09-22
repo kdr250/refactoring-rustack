@@ -4,7 +4,7 @@
 
 ## wasm-packのビルド(Web)
 `wasm-pack build --target web`<br>
-=> wasm_bg.wasm、wasm_bg.wasm.d.ts、wams.d.ts、wasm.jsなどを生成してくれる
+=> wasm_bg.wasm、wasm_bg.wasm.d.ts、wams.d.ts、wasm.jsなどを生成してくれる<br>
 => index.html、index.js、main.jsは自分で書いた
 
 ## ブラウザで確認
