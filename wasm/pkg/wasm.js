@@ -140,6 +140,17 @@ export function evaluate(code) {
 }
 
 /**
+* @param {string} code
+* @returns {Uint8Array}
+*/
+export function evaluate_image(code) {
+    const ptr0 = passStringToWasm0(code, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.evaluate_image(ptr0, len0);
+    return takeObject(ret);
+}
+
+/**
 * @returns {Uint8Array}
 */
 export function image_mandelbrot() {
