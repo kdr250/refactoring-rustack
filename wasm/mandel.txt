@@ -1,0 +1,80 @@
+/escape_time {
+    /c_real exch def
+    /c_image exch def
+
+    /z_real 0.0 def
+    /z_image 0.0 def
+    /count 0 def
+    /result 0 def
+    /is_searching 1 def
+
+    { 1 count 256 < is_searching + < }
+    {
+        { 4 z_real z_real * z_image z_image * + < }
+        {
+            /result count def
+            /is_searching 0 def
+        }
+        {
+            /z_real_next z_real z_real * z_image z_image * - c_real + def
+            /z_image 2 z_real * z_image * c_image + def
+            /z_real z_real_next def
+        } if
+
+        /count count 1 + def
+    } while
+
+    { 0 result < }
+    {
+        255 result - puts
+    }
+    {
+        0 puts
+    } if
+} def
+
+/pixel_to_complex {
+    /bound_height exch def
+    /bound_width exch def
+    /pixel_y exch def
+    /pixel_x exch def
+    /lower_right_image exch def
+    /lower_right_real exch def
+    /upper_left_image exch def
+    /upper_left_real exch def
+
+    /complex_width lower_right_real upper_left_real - def
+    /complex_height upper_left_image lower_right_image - def
+
+    /real pixel_x complex_width * bound_width / upper_left_real + def
+    /image pixel_y complex_height * bound_height / upper_left_image - def
+
+    image real
+} def
+
+/mandel {
+    /row exch def
+    /column exch def
+    /lower_right_image exch def
+    /lower_right_real exch def
+    /upper_left_image exch def
+    /upper_left_real exch def
+
+    /row_count 0 def
+    /column_count 0 def
+
+    0 row {
+        0 column {
+            upper_left_real upper_left_image lower_right_real lower_right_image column_count row_count column row pixel_to_complex
+
+            escape_time
+
+            /column_count column_count 1 + def
+        } for
+        /row_count row_count 1 + def
+    } for
+} def
+
+100 puts
+100 puts
+-1.2 0.35 -1.0 0.20 100 100 mandel
