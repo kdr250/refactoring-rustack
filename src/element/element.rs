@@ -65,16 +65,6 @@ impl Element {
             _ => panic!("Value is not a block"),
         }
     }
-
-    pub fn to_string(&self) -> String {
-        match self {
-            Self::Number(num) => num.to_string(),
-            Self::Operation(operation) => operation.to_string(),
-            Self::Symbol(s) => s.clone(),
-            Self::Block(_) => "<Block>".to_string(),
-            Self::NativeOperation(_) => "<NativeOp>".to_string(),
-        }
-    }
 }
 
 #[cfg(test)]
