@@ -15,7 +15,7 @@ pub struct Stack {
 impl Stack {
     /// スタックを生成する
     pub fn new() -> Self {
-        let functions: [(&str, fn(&mut Stack)); 13] = [
+        let functions: [(&str, fn(&mut Stack)); 14] = [
             ("+", Stack::add),
             ("-", Stack::subtract),
             ("*", Stack::multiply),
@@ -23,6 +23,7 @@ impl Stack {
             ("<", Stack::less_than),
             ("if", Stack::operate_if),
             ("def", Stack::operate_define),
+            ("for", Stack::operate_for),
             ("while", Stack::operate_while),
             ("puts", Stack::puts),
             ("pop", Stack::pop),
@@ -141,7 +142,18 @@ impl Stack {
         self.variables.last_mut().unwrap().insert(symbol, element);
     }
 
-    /// 繰り返し操作を行う
+    /// for文による繰り返し操作を行う
+    fn operate_for(&mut self) {
+        let loop_block = self.list.pop().unwrap().to_block_vec();
+        let end = self.list.pop().unwrap().as_number();
+        let start = self.list.pop().unwrap().as_number();
+
+        for _ in start..=end {
+            self.evaluate_multiple(loop_block.clone());
+        }
+    }
+
+    /// while文による繰り返し操作を行う
     fn operate_while(&mut self) {
         let loop_block = self.list.pop().unwrap().to_block_vec();
         let condition = self.list.pop().unwrap().to_block_vec();
@@ -303,6 +315,15 @@ if
         }
 
         assert_eq!(stack.list, vec![Element::Number(20)]);
+    }
+
+    #[test]
+    fn test_for() {
+        let mut parser = Parser::new();
+        let mut iter = parser.parse(String::from("/x 0 def 1 100 { /x x 1 + def } for x"));
+        let stack = parse(&mut iter);
+
+        assert_eq!(stack.list, vec![Element::Number(100)]);
     }
 
     #[test]
