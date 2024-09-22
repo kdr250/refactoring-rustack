@@ -29,6 +29,8 @@ fn parse_batch(source: impl BufRead) {
             virtual_machine.evaluate(element);
         }
     }
+
+    virtual_machine.print_outputs();
 }
 
 /// 標準入力をインタラクティブにパースして処理する

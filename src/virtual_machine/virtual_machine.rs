@@ -25,8 +25,13 @@ impl VirtualMachine {
         &self.stack
     }
 
-    /// 出力
-    pub fn output(&self) -> Vec<String> {
-        self.stack.list().iter().map(|e| e.to_string()).collect()
+    /// 出力を返す
+    pub fn outputs(&self) -> &Vec<String> {
+        self.stack.outputs()
+    }
+
+    /// 出力をプリントする
+    pub fn print_outputs(&self) {
+        self.outputs().iter().for_each(|o| println!("{o}"));
     }
 }

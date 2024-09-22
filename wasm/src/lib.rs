@@ -14,7 +14,7 @@ pub fn set_panic_hook() {
 }
 
 #[wasm_bindgen]
-pub fn evaluate(code: &str) -> Vec<String> {
+pub fn evaluate(code: &str) -> String {
     let mut virtual_machine = VirtualMachine::new();
     let mut parser = Parser::new();
 
@@ -24,5 +24,9 @@ pub fn evaluate(code: &str) -> Vec<String> {
         }
     }
 
-    virtual_machine.output()
+    virtual_machine
+        .outputs()
+        .into_iter()
+        .map(|o| format!("puts: {o}\n"))
+        .collect()
 }

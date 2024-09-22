@@ -5,9 +5,9 @@
 export function set_panic_hook(): void;
 /**
 * @param {string} code
-* @returns {(string)[]}
+* @returns {string}
 */
-export function evaluate(code: string): (string)[];
+export function evaluate(code: string): string;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 

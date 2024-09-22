@@ -9,6 +9,7 @@ use super::stack_helper::impl_operation;
 pub struct Stack {
     list: Vec<Element>,
     variables: Vec<HashMap<String, Element>>,
+    outputs: Vec<String>,
 }
 
 impl Stack {
@@ -40,7 +41,12 @@ impl Stack {
                     )
                 })
                 .collect()],
+            outputs: vec![],
         }
+    }
+
+    pub fn outputs(&self) -> &Vec<String> {
+        &self.outputs
     }
 
     pub fn list(&self) -> &Vec<Element> {
@@ -152,7 +158,7 @@ impl Stack {
     /// スタックの先頭を取り出して表示する
     fn puts(&mut self) {
         let element = self.list.pop().unwrap();
-        println!("{}", element.to_string());
+        self.outputs.push(element.to_string());
     }
 
     /// スタックの先頭を取り出す
