@@ -1,4 +1,4 @@
-import init, { set_panic_hook, evaluate } from "./wasm.js";
+import init, { set_panic_hook, evaluate, image_mandelbrot } from "./wasm.js";
 
 async function initialize() {
     await init();
@@ -6,6 +6,7 @@ async function initialize() {
     set_panic_hook();
 
     document.getElementById("run").addEventListener("click", () => run());
+    document.getElementById("run-image").addEventListener("click", () => runImage());
 }
 
 function run() {
@@ -14,6 +15,13 @@ function run() {
 
     const output = document.getElementById("output");
     output.value = result;
+}
+
+function runImage() {
+    const result = image_mandelbrot();
+    const blob = new Blob([result]);
+    const image = document.getElementById("image");
+    image.setAttribute("src", URL.createObjectURL(blob));
 }
 
 initialize();
