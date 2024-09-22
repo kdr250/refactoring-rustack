@@ -31,7 +31,7 @@ pub fn evaluate(code: &str) -> String {
     virtual_machine
         .outputs()
         .into_iter()
-        .map(|o| format!("puts: {o}\n"))
+        .map(|out| format!("puts: {out}\n"))
         .collect()
 }
 

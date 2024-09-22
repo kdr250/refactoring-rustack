@@ -26,12 +26,12 @@ impl VirtualMachine {
     }
 
     /// 出力を返す
-    pub fn outputs(&self) -> &Vec<String> {
+    pub fn outputs(&self) -> &Vec<i32> {
         self.stack.outputs()
     }
 
     /// 出力をプリントする
     pub fn print_outputs(&self) {
-        self.outputs().iter().for_each(|o| println!("{o}"));
+        self.outputs().iter().for_each(|out| println!("{out}"));
     }
 }
