@@ -48,7 +48,7 @@ impl Block {
                 blocks[index].add(Element::Integer(parsed))
             } else if let Ok(parsed) = word.parse::<f32>() {
                 blocks[index].add(Element::Number(parsed))
-            } else if word.starts_with("/") {
+            } else if word.starts_with("/") && word.len() >= 2 {
                 blocks[index].add(Element::Symbol(word[1..].to_owned()))
             } else {
                 blocks[index].add(Element::Operation(word.to_string()))

@@ -42,7 +42,7 @@ impl Element {
             Some(Element::Integer(parsed))
         } else if let Ok(parsed) = word.parse::<f32>() {
             Some(Element::Number(parsed))
-        } else if word.starts_with("/") {
+        } else if word.starts_with("/") && word.len() >= 2 {
             Some(Element::Symbol(word[1..].to_owned()))
         } else {
             Some(Element::Operation(word.to_string()))
@@ -61,7 +61,7 @@ impl Element {
         match self {
             Element::Integer(num) => *num as f32,
             Element::Number(num) => *num,
-            _ => panic!("Element is not a number"),
+            _ => panic!("{}", format!("Element is not a number: {self:?}")),
         }
     }
 
