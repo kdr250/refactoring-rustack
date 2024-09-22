@@ -6,9 +6,7 @@ pub fn mandelbrot() -> ImageBuffer<Luma<u8>, Vec<u8>> {
     let upper_left = Complex::new(-1.2, 0.35);
     let lower_right = Complex::new(-1.0, 0.20);
 
-    let mut pixels = vec![0; bounds.0 * bounds.1];
-
-    render(&mut pixels, bounds, upper_left, lower_right)
+    render(bounds, upper_left, lower_right)
 }
 
 fn escape_time(c: Complex<f64>, limit: usize) -> Option<usize> {
@@ -40,13 +38,10 @@ fn pixel_to_point(
 }
 
 fn render(
-    pixels: &mut [u8],
     bounds: (usize, usize),
     upper_left: Complex<f64>,
     lower_right: Complex<f64>,
 ) -> ImageBuffer<Luma<u8>, Vec<u8>> {
-    assert!(pixels.len() == bounds.0 * bounds.1);
-
     let mut image = GrayImage::new(bounds.0 as u32, bounds.1 as u32);
 
     image
