@@ -2,14 +2,14 @@ use std::collections::HashMap;
 
 use crate::element::{Element, NativeOperation};
 
-use super::stack_helper::impl_operation;
+use super::stack_helper::{impl_operation, impl_operation_integer};
 
 /// スタック
 #[derive(Debug)]
 pub struct Stack {
     list: Vec<Element>,
     variables: Vec<HashMap<String, Element>>,
-    outputs: Vec<i32>,
+    outputs: Vec<f32>,
 }
 
 impl Stack {
@@ -46,7 +46,7 @@ impl Stack {
         }
     }
 
-    pub fn outputs(&self) -> &Vec<i32> {
+    pub fn outputs(&self) -> &Vec<f32> {
         &self.outputs
     }
 
@@ -57,9 +57,9 @@ impl Stack {
     /// 要素を評価する
     pub fn evaluate(&mut self, element: Element) {
         match element {
-            Element::Number(_) | Element::Block(_) | Element::Symbol(_) => self.push(element),
             Element::Operation(operation) => self.execute(operation),
             Element::NativeOperation(_) => panic!("Native operation is not allowed!"),
+            _ => self.push(element),
         }
     }
 
@@ -114,7 +114,7 @@ impl Stack {
     impl_operation!(divide, /);
 
     // 小なり大小比較を行う
-    impl_operation!(less_than, <);
+    impl_operation_integer!(less_than, <);
 
     /// 条件分岐を行う
     fn operate_if(&mut self) {
@@ -124,7 +124,7 @@ impl Stack {
 
         self.evaluate_multiple(condition);
 
-        let condition_result = self.list.pop().unwrap().as_number();
+        let condition_result = self.list.pop().unwrap().as_integer();
 
         match condition_result {
             0 => self.evaluate_multiple(false_branch),
@@ -145,8 +145,8 @@ impl Stack {
     /// for文による繰り返し操作を行う
     fn operate_for(&mut self) {
         let loop_block = self.list.pop().unwrap().to_block_vec();
-        let end = self.list.pop().unwrap().as_number();
-        let start = self.list.pop().unwrap().as_number();
+        let end = self.list.pop().unwrap().as_integer();
+        let start = self.list.pop().unwrap().as_integer();
 
         for _ in start..=end {
             self.evaluate_multiple(loop_block.clone());
@@ -158,12 +158,12 @@ impl Stack {
         let loop_block = self.list.pop().unwrap().to_block_vec();
         let condition = self.list.pop().unwrap().to_block_vec();
         self.evaluate_multiple(condition.clone());
-        let mut condition_result = self.list.pop().unwrap().as_number();
+        let mut condition_result = self.list.pop().unwrap().as_integer();
 
         while condition_result != 0 {
             self.evaluate_multiple(loop_block.clone());
             self.evaluate_multiple(condition.clone());
-            condition_result = self.list.pop().unwrap().as_number();
+            condition_result = self.list.pop().unwrap().as_integer();
         }
     }
 
@@ -218,12 +218,12 @@ mod tests {
     #[test]
     fn test_add() {
         let mut stack = Stack::new();
-        stack.push(Element::Number(45));
-        stack.push(Element::Number(55));
+        stack.push(Element::Integer(45));
+        stack.push(Element::Integer(55));
 
         stack.add();
 
-        assert_eq!(stack.list[0], Element::Number(100));
+        assert_eq!(stack.list[0], Element::Number(100.0));
     }
 
     #[test]
@@ -235,8 +235,8 @@ mod tests {
         assert_eq!(
             stack.list,
             vec![
-                Element::Number(3),
-                Element::Block(create_block(vec![Element::Number(3), Element::Number(4)]))
+                Element::Number(3.0),
+                Element::Block(create_block(vec![Element::Integer(3), Element::Integer(4)]))
             ]
         )
     }
@@ -247,7 +247,7 @@ mod tests {
         let mut iter = parser.parse(String::from("{ 1 -1 + } { 100 } { -100 } if"));
         let stack = parse(&mut iter);
 
-        assert_eq!(stack.list, vec![Element::Number(-100)])
+        assert_eq!(stack.list, vec![Element::Integer(-100)])
     }
 
     #[test]
@@ -256,7 +256,7 @@ mod tests {
         let mut iter = parser.parse(String::from("{ 1 1 + } { 100 } { -100 } if"));
         let stack = parse(&mut iter);
 
-        assert_eq!(stack.list, vec![Element::Number(100)])
+        assert_eq!(stack.list, vec![Element::Integer(100)])
     }
 
     #[test]
@@ -265,7 +265,7 @@ mod tests {
         let mut iter = parser.parse(String::from("/x 10 def /y 20 def x y *"));
         let stack = parse(&mut iter);
 
-        assert_eq!(stack.list, vec![Element::Number(200)]);
+        assert_eq!(stack.list, vec![Element::Number(200.0)]);
     }
 
     #[test]
@@ -274,7 +274,7 @@ mod tests {
         let mut iter = parser.parse(String::from("/x 10 def /y 20 def { x y < } { x } { y } if"));
         let stack = parse(&mut iter);
 
-        assert_eq!(stack.list, vec![Element::Number(10)]);
+        assert_eq!(stack.list, vec![Element::Integer(10)]);
     }
 
     #[test]
@@ -296,7 +296,7 @@ if
             }
         }
 
-        assert_eq!(stack.list, vec![Element::Number(10)]);
+        assert_eq!(stack.list, vec![Element::Integer(10)]);
     }
 
     #[test]
@@ -314,7 +314,7 @@ if
             }
         }
 
-        assert_eq!(stack.list, vec![Element::Number(20)]);
+        assert_eq!(stack.list, vec![Element::Number(20.0)]);
     }
 
     #[test]
@@ -323,7 +323,7 @@ if
         let mut iter = parser.parse(String::from("/x 0 def 1 100 { /x x 1 + def } for x"));
         let stack = parse(&mut iter);
 
-        assert_eq!(stack.list, vec![Element::Number(100)]);
+        assert_eq!(stack.list, vec![Element::Number(100.0)]);
     }
 
     #[test]
@@ -334,6 +334,6 @@ if
         ));
         let stack = parse(&mut iter);
 
-        assert_eq!(stack.list, vec![Element::Number(3)]);
+        assert_eq!(stack.list, vec![Element::Number(3.0)]);
     }
 }

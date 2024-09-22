@@ -26,7 +26,7 @@ impl VirtualMachine {
     }
 
     /// 出力を返す
-    pub fn outputs(&self) -> &Vec<i32> {
+    pub fn outputs(&self) -> &Vec<f32> {
         self.stack.outputs()
     }
 

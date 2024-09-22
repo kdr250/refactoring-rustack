@@ -45,6 +45,8 @@ impl Block {
                     return Block::parse(iter, blocks);
                 }
             } else if let Ok(parsed) = word.parse::<i32>() {
+                blocks[index].add(Element::Integer(parsed))
+            } else if let Ok(parsed) = word.parse::<f32>() {
                 blocks[index].add(Element::Number(parsed))
             } else if word.starts_with("/") {
                 blocks[index].add(Element::Symbol(word[1..].to_owned()))
@@ -79,21 +81,21 @@ pub mod tests {
 
         assert_eq!(
             actual,
-            Element::Block(create_block(vec![Element::Number(3), Element::Number(4)]))
+            Element::Block(create_block(vec![Element::Integer(3), Element::Integer(4)]))
         );
     }
 
     #[test]
     fn test_group2() {
         let mut parser = Parser::new();
-        let iter = parser.parse(String::from("{ { 3 } 4 }"));
+        let iter = parser.parse(String::from("{ { 3.0 } 4.0 }"));
         let actual: Vec<Element> = iter.collect();
 
         assert_eq!(
             actual,
             vec![Element::Block(create_block(vec![
-                Element::Block(create_block(vec![Element::Number(3)])),
-                Element::Number(4)
+                Element::Block(create_block(vec![Element::Number(3.0)])),
+                Element::Number(4.0)
             ]))]
         );
     }
@@ -104,7 +106,7 @@ pub mod tests {
         let mut actual = vec![];
         let lines = r#"
 { { 3
-{ 5
+{ 5.0
 }
 }
 }
@@ -119,8 +121,8 @@ pub mod tests {
             actual,
             vec![Element::Block(create_block(vec![Element::Block(
                 create_block(vec![
-                    Element::Number(3),
-                    Element::Block(create_block(vec![Element::Number(5)]))
+                    Element::Integer(3),
+                    Element::Block(create_block(vec![Element::Number(5.0)]))
                 ])
             )]))]
         );
