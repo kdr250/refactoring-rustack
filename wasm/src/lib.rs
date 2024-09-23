@@ -1,4 +1,3 @@
-pub mod mandel;
 mod utils;
 
 use std::io::Cursor;
@@ -57,19 +56,6 @@ pub fn evaluate_image(code: &str) -> Uint8Array {
 
     let mut result: Cursor<Vec<u8>> = Cursor::new(Vec::new());
     image
-        .write_to(&mut result, image::ImageFormat::Png)
-        .expect("Error occurs when writing to buffer");
-
-    Uint8Array::new(&unsafe { Uint8Array::view(&result.into_inner()) }.into())
-}
-
-#[wasm_bindgen]
-pub fn image_mandelbrot() -> Uint8Array {
-    // マンデルブロ集合
-    let buffer = mandel::mandelbrot();
-
-    let mut result: Cursor<Vec<u8>> = Cursor::new(Vec::new());
-    buffer
         .write_to(&mut result, image::ImageFormat::Png)
         .expect("Error occurs when writing to buffer");
 

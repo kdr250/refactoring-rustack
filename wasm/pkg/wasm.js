@@ -150,14 +150,6 @@ export function evaluate_image(code) {
     return takeObject(ret);
 }
 
-/**
-* @returns {Uint8Array}
-*/
-export function image_mandelbrot() {
-    const ret = wasm.image_mandelbrot();
-    return takeObject(ret);
-}
-
 async function __wbg_load(module, imports) {
     if (typeof Response === 'function' && module instanceof Response) {
         if (typeof WebAssembly.instantiateStreaming === 'function') {
