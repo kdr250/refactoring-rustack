@@ -8,7 +8,7 @@
     /result 0 def
     /is_searching 1 def
 
-    { 1 count 256 < is_searching + < }
+    { 1 count 64 < is_searching + < }
     {
         { 4 z_real z_real * z_image z_image * + < }
         {
