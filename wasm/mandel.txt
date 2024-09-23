@@ -1,6 +1,6 @@
 /escape_time {
-    /c_real exch def
     /c_image exch def
+    /c_real exch def
 
     /z_real 0.0 def
     /z_image 0.0 def
@@ -46,10 +46,10 @@
     /complex_width lower_right_real upper_left_real - def
     /complex_height upper_left_image lower_right_image - def
 
-    /real pixel_x complex_width * bound_width / upper_left_real + def
-    /image pixel_y complex_height * bound_height / upper_left_image - def
+    /real upper_left_real pixel_x complex_width * bound_width / + def
+    /image upper_left_image pixel_y complex_height * bound_height / - def
 
-    image real
+    real image
 } def
 
 /mandel {
@@ -75,6 +75,6 @@
     } for
 } def
 
-100 puts
-100 puts
--1.2 0.35 -1.0 0.20 100 100 mandel
+80 puts
+80 puts
+-1.2 0.35 -1.0 0.20 80 80 mandel
