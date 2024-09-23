@@ -2,6 +2,7 @@
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
 export function evaluate(a: number, b: number, c: number): void;
+export function evaluate_image(a: number, b: number): number;
 export function set_panic_hook(): void;
 export function __wbindgen_add_to_stack_pointer(a: number): number;
 export function __wbindgen_malloc(a: number, b: number): number;

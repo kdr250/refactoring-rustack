@@ -5,8 +5,10 @@ use super::{block::Block, native_operation::NativeOperation};
 /// 言語を構成する要素
 #[derive(Debug, PartialEq, Clone)]
 pub enum Element {
+    /// 整数
+    Integer(i32),
     /// 数値
-    Number(i32),
+    Number(f32),
     /// 演算
     Operation(String),
     /// シンボル
@@ -37,18 +39,29 @@ impl Element {
             let block = Block::parse(iter, &mut borrowed)?;
             Some(Element::Block(block))
         } else if let Ok(parsed) = word.parse::<i32>() {
+            Some(Element::Integer(parsed))
+        } else if let Ok(parsed) = word.parse::<f32>() {
             Some(Element::Number(parsed))
-        } else if word.starts_with("/") {
+        } else if word.starts_with("/") && word.len() >= 2 {
             Some(Element::Symbol(word[1..].to_owned()))
         } else {
             Some(Element::Operation(word.to_string()))
         }
     }
 
-    pub fn as_number(&self) -> i32 {
+    pub fn as_integer(&self) -> i32 {
         match self {
-            Element::Number(num) => *num,
+            Element::Integer(num) => *num,
+            Element::Number(num) => *num as i32,
             _ => panic!("Element is not a number"),
+        }
+    }
+
+    pub fn as_number(&self) -> f32 {
+        match self {
+            Element::Integer(num) => *num as f32,
+            Element::Number(num) => *num,
+            _ => panic!("{}", format!("Element is not a number: {self:?}")),
         }
     }
 
@@ -65,16 +78,6 @@ impl Element {
             _ => panic!("Value is not a block"),
         }
     }
-
-    pub fn to_string(&self) -> String {
-        match self {
-            Self::Number(num) => num.to_string(),
-            Self::Operation(operation) => operation.to_string(),
-            Self::Symbol(s) => s.clone(),
-            Self::Block(_) => "<Block>".to_string(),
-            Self::NativeOperation(_) => "<NativeOp>".to_string(),
-        }
-    }
 }
 
 #[cfg(test)]
@@ -86,16 +89,19 @@ mod tests {
     #[test]
     fn test_group() {
         let mut parser = Parser::new();
-        let iter = parser.parse(String::from("1 2 + { 3 4 }"));
+        let iter = parser.parse(String::from("1.0 2.0 + { 3.0 4.0 }"));
         let actual: Vec<Element> = iter.collect();
 
         assert_eq!(
             actual,
             vec![
-                Element::Number(1),
-                Element::Number(2),
+                Element::Number(1.0),
+                Element::Number(2.0),
                 Element::Operation("+".to_string()),
-                Element::Block(create_block(vec![Element::Number(3), Element::Number(4)]))
+                Element::Block(create_block(vec![
+                    Element::Number(3.0),
+                    Element::Number(4.0)
+                ]))
             ]
         );
     }

@@ -8,12 +8,18 @@ export function set_panic_hook(): void;
 * @returns {string}
 */
 export function evaluate(code: string): string;
+/**
+* @param {string} code
+* @returns {Uint8Array}
+*/
+export function evaluate_image(code: string): Uint8Array;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly evaluate: (a: number, b: number, c: number) => void;
+  readonly evaluate_image: (a: number, b: number) => number;
   readonly set_panic_hook: () => void;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
