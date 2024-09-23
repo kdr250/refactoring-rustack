@@ -11,8 +11,8 @@ macro_rules! impl_operation {
 macro_rules! impl_operation_integer {
     {$name:ident, $op:tt} => {
         fn $name(&mut self) {
-            let rhs = self.list.pop().unwrap().as_integer();
-            let lhs = self.list.pop().unwrap().as_integer();
+            let rhs = self.list.pop().unwrap().as_number();
+            let lhs = self.list.pop().unwrap().as_number();
             self.list.push(Element::Integer((lhs $op rhs) as i32));
         }
     }
