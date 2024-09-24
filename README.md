@@ -17,6 +17,10 @@
 `cargo run while.txt`<br>
 -> 100 を出力する
 
+## ブラウザで確認
+`python3 -m http.server 8080 -d wasm/pkg`<br>
+=> ブラウザで `http://localhost:8080/index.html` で確認する。 
+
 ## 参考URL
 - [GitHub - rustack](https://github.com/msakuta/rustack)
 - [技術評論社 Rustで作るプログラミング言語 - コンパイラ／インタプリタの基礎からプログラミング言語の新潮流まで](https://gihyo.jp/book/2024/978-4-297-14192-9)
