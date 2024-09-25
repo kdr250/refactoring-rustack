@@ -19,6 +19,7 @@
 
 ## ブラウザで確認
 `cd wasm`<br>
+`npm install`<br>
 `npm start`
 
 ## 参考URL
