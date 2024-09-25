@@ -18,8 +18,8 @@
 -> 100 を出力する
 
 ## ブラウザで確認
-`python3 -m http.server 8080 -d wasm/pkg`<br>
-=> ブラウザで `http://localhost:8080/index.html` で確認する。 
+`cd wasm`<br>
+`npm start`
 
 ## 参考URL
 - [GitHub - rustack](https://github.com/msakuta/rustack)
