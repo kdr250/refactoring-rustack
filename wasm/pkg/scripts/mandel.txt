@@ -60,14 +60,12 @@
     /upper_left_image exch def
     /upper_left_real exch def
 
-    /row row 1 - def
-    /column column 1 - def
     /row_count 0 def
     /column_count 0 def
 
-    0 row {
+    1 row {
         /column_count 0 def
-        0 column {
+        1 column {
             upper_left_real upper_left_image lower_right_real lower_right_image column_count row_count column row pixel_to_complex
 
             escape_time
