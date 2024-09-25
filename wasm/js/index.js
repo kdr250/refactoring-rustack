@@ -1,1 +1,3 @@
-import("../pkg/index.js").catch(console.error);
+window.onload = () => {
+    import("./main.js").catch(console.error);
+}
