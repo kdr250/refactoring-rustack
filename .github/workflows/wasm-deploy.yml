@@ -1,0 +1,36 @@
+name: wasm-deploy
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: wasm-pack-actions
+        uses: jetli/wasm-pack-action@v0.4.0
+        #with:
+          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
+          #version: 'latest'
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Build
+        run:
+          cd wasm &&
+          mkdir dist &&
+          npm ci &&
+          npm run build
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./wasm/dist
+          force_orphan: true
