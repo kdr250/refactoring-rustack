@@ -1,8 +1,8 @@
-import init, { set_panic_hook, evaluate, evaluate_image } from "./wasm.js";
+import { set_panic_hook, evaluate, evaluate_image } from "../pkg/index.js";
 
-async function initialize() {
-    await init();
+initialize();
 
+function initialize() {
     set_panic_hook();
 
     generateSamples();
@@ -14,7 +14,7 @@ async function initialize() {
 function generateSamples() {
     const samples = document.getElementById("samples");
 
-    ["while_gray.txt", "mandel.txt"]
+    ["gradation.txt", "circle.txt", "mandel.txt"]
         .forEach(fileName => {
             const link = document.createElement("a");
             link.href = "#";
@@ -47,5 +47,3 @@ function runImage() {
     const image = document.getElementById("image");
     image.setAttribute("src", URL.createObjectURL(blob));
 }
-
-initialize();
