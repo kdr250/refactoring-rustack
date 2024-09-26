@@ -14,7 +14,7 @@ function initialize() {
 function generateSamples() {
     const samples = document.getElementById("samples");
 
-    ["while_gray.txt", "mandel.txt"]
+    ["gradation.txt", "circle.txt", "mandel.txt"]
         .forEach(fileName => {
             const link = document.createElement("a");
             link.href = "#";

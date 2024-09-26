@@ -10,12 +10,10 @@
     { y 256 < }
     {
         x puts
-        y 1 +
-        /y exch def
+        /y y 1 + def
     }
     while
 
-    x 1 +
-    /x exch def
+    /x x 1 + def
 }
 while
