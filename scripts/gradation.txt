@@ -1,0 +1,19 @@
+256 puts
+256 puts
+
+/x 0 def
+
+{ x 256 < }
+{
+    /y 0 def
+
+    { y 256 < }
+    {
+        x puts
+        /y y 1 + def
+    }
+    while
+
+    /x x 1 + def
+}
+while

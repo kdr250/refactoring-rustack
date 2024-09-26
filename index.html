@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>wasm</title>
+  <style>
+    canvas {
+      background-color: black;
+    }
+  </style>
+</head>
+
+<body id="wasm-example">
+  <h1>Wasm</h1>
+  <div>
+    <div>
+      Samples: <span id="samples"></span>
+    </div>
+    <textarea id="input" type="text" cols="80" rows="20"></textarea>
+  </div>
+  <div>
+    <button id="run">Run</button>
+    <button id="run-image">Image</button>
+  </div>
+  <div>
+    <div style="margin:10px">
+      <textarea id="output" type="text" readonly cols="80" rows="15"></textarea>
+    </div>
+  </div>
+  <div>
+    <div style="margin:10px">
+      <div>↓Image</div>
+      <img id="image">
+    </div>
+  </div>
+  <script src="./index.js"></script>
+</body>
+
+</html>
